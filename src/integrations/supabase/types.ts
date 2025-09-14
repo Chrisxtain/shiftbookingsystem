@@ -14,7 +14,119 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      shift_bookings: {
+        Row: {
+          actual_end_time: string | null
+          actual_hours_worked: number | null
+          actual_start_time: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          shift_date: string
+          shift_id: string | null
+          status: Database["public"]["Enums"]["shift_status"] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_hours_worked?: number | null
+          actual_start_time?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          shift_date: string
+          shift_id?: string | null
+          status?: Database["public"]["Enums"]["shift_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_hours_worked?: number | null
+          actual_start_time?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          shift_date?: string
+          shift_id?: string | null
+          status?: Database["public"]["Enums"]["shift_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_bookings_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          created_at: string | null
+          duration_hours: number | null
+          end_time: string
+          id: string
+          is_active: boolean | null
+          name: string
+          shift_type: Database["public"]["Enums"]["shift_type"]
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration_hours?: number | null
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          shift_type: Database["public"]["Enums"]["shift_type"]
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration_hours?: number | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          shift_type?: Database["public"]["Enums"]["shift_type"]
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +135,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      shift_status:
+        | "available"
+        | "booked"
+        | "in_progress"
+        | "completed"
+        | "incomplete"
+        | "cancelled"
+      shift_type: "morning" | "evening" | "night" | "custom"
+      user_role: "super_admin" | "admin" | "worker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +270,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      shift_status: [
+        "available",
+        "booked",
+        "in_progress",
+        "completed",
+        "incomplete",
+        "cancelled",
+      ],
+      shift_type: ["morning", "evening", "night", "custom"],
+      user_role: ["super_admin", "admin", "worker"],
+    },
   },
 } as const
