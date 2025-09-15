@@ -8,6 +8,9 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Shifts from "./pages/Shifts";
+import MyBookings from "./pages/MyBookings";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +30,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/shifts" 
+              element={
+                <ProtectedRoute>
+                  <Shifts />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-bookings" 
+              element={
+                <ProtectedRoute>
+                  <MyBookings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPanel />
                 </ProtectedRoute>
               } 
             />
