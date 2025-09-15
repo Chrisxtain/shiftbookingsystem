@@ -2,9 +2,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, LogOut, Settings, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user, profile, signOut, isAdmin, isSuperAdmin } = useAuth();
+  const navigate = useNavigate();
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -104,7 +106,7 @@ const Dashboard = () => {
               <p className="text-muted-foreground mb-4">
                 View available shifts and book your preferred time slots.
               </p>
-              <Button className="w-full">
+              <Button className="w-full" onClick={() => navigate('/shifts')}>
                 <Calendar className="w-4 h-4 mr-2" />
                 View Calendar
               </Button>
