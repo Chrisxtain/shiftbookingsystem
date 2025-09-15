@@ -79,16 +79,17 @@ const Shifts = () => {
     if (!user) return;
 
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    const selectedShift = shifts.find(s => s.id === shiftId);
     
-    // Check if already booked
+    // Check if user already has any shift booked for this shift type on the selected date
     const existingBooking = bookings.find(
       booking => 
-        booking.shift_id === shiftId && 
+        booking.shifts?.shift_type === selectedShift?.shift_type && 
         booking.shift_date === selectedDateStr
     );
 
     if (existingBooking) {
-      toast.error('You have already booked this shift for the selected date');
+      toast.error(`You already have a ${selectedShift?.shift_type} shift booked for this date`);
       return;
     }
 
@@ -180,9 +181,9 @@ const Shifts = () => {
           <div className="lg:col-span-3">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {shifts.map((shift) => {
-                const isBooked = bookings.some(
+                const isShiftTypeBooked = bookings.some(
                   booking => 
-                    booking.shift_id === shift.id && 
+                    booking.shifts?.shift_type === shift.shift_type && 
                     booking.shift_date === selectedDate.toISOString().split('T')[0]
                 );
 
@@ -211,11 +212,11 @@ const Shifts = () => {
 
                       <Button 
                         onClick={() => bookShift(shift.id)}
-                        disabled={isBooked}
+                        disabled={isShiftTypeBooked}
                         className="w-full"
-                        variant={isBooked ? "secondary" : "default"}
+                        variant={isShiftTypeBooked ? "secondary" : "default"}
                       >
-                        {isBooked ? "Already Booked" : "Book Shift"}
+                        {isShiftTypeBooked ? `${shift.shift_type} shift booked` : "Book Shift"}
                       </Button>
                     </CardContent>
                   </Card>
