@@ -110,6 +110,38 @@ const Shifts = () => {
     }
   };
 
+  const unbookShift = async (shiftId: string) => {
+    if (!user) return;
+
+    const selectedDateStr = selectedDate.toISOString().split('T')[0];
+
+    try {
+      const { error } = await supabase
+        .from('shift_bookings')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('shift_id', shiftId)
+        .eq('shift_date', selectedDateStr);
+
+      if (error) throw error;
+
+      toast.success('Shift unbooked successfully!');
+      fetchBookings(); // Refresh bookings
+    } catch (error) {
+      console.error('Error unbooking shift:', error);
+      toast.error('Failed to unbook shift');
+    }
+  };
+
+  const canUnbookShift = (shift: Shift) => {
+    const now = new Date();
+    const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    const shiftDateTime = new Date(`${selectedDateStr}T${shift.start_time}`);
+    const thirtyMinutesBefore = new Date(shiftDateTime.getTime() - 30 * 60 * 1000);
+    
+    return now < thirtyMinutesBefore;
+  };
+
   const getShiftTypeColor = (type: string) => {
     const colors = {
       'morning': 'bg-primary/10 text-primary',
@@ -178,18 +210,31 @@ const Shifts = () => {
           <div className="lg:col-span-3">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {shifts.map((shift) => {
-                const hasShiftBookedForDate = bookings.some(
+                const hasAnyShiftBookedForDate = bookings.some(
                   booking => booking.shift_date === selectedDate.toISOString().split('T')[0]
                 );
+
+                const isThisShiftBooked = bookings.some(
+                  booking => 
+                    booking.shift_id === shift.id && 
+                    booking.shift_date === selectedDate.toISOString().split('T')[0]
+                );
+
+                const canUnbook = canUnbookShift(shift);
 
                 return (
                   <Card key={shift.id} className="hover:shadow-md transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{shift.name}</CardTitle>
-                        <Badge className={getShiftTypeColor(shift.shift_type)}>
-                          {shift.shift_type}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getShiftTypeColor(shift.shift_type)}>
+                            {shift.shift_type}
+                          </Badge>
+                          {isThisShiftBooked && (
+                            <Badge variant="secondary">Booked</Badge>
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -205,14 +250,25 @@ const Shifts = () => {
                         <span>{shift.duration_hours} hours</span>
                       </div>
 
-                      <Button 
-                        onClick={() => bookShift(shift.id)}
-                        disabled={hasShiftBookedForDate}
-                        className="w-full"
-                        variant={hasShiftBookedForDate ? "secondary" : "default"}
-                      >
-                        {hasShiftBookedForDate ? "Already have shift for this day" : "Book Shift"}
-                      </Button>
+                      {isThisShiftBooked ? (
+                        <Button 
+                          onClick={() => unbookShift(shift.id)}
+                          disabled={!canUnbook}
+                          className="w-full"
+                          variant="outline"
+                        >
+                          {canUnbook ? "Unbook Shift" : "Locked (starts soon)"}
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => bookShift(shift.id)}
+                          disabled={hasAnyShiftBookedForDate}
+                          className="w-full"
+                          variant={hasAnyShiftBookedForDate ? "secondary" : "default"}
+                        >
+                          {hasAnyShiftBookedForDate ? "Already have shift for this day" : "Book Shift"}
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 );
