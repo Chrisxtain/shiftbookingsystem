@@ -79,17 +79,14 @@ const Shifts = () => {
     if (!user) return;
 
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
-    const selectedShift = shifts.find(s => s.id === shiftId);
     
-    // Check if user already has any shift booked for this shift type on the selected date
+    // Check if user already has ANY shift booked for the selected date
     const existingBooking = bookings.find(
-      booking => 
-        booking.shifts?.shift_type === selectedShift?.shift_type && 
-        booking.shift_date === selectedDateStr
+      booking => booking.shift_date === selectedDateStr
     );
 
     if (existingBooking) {
-      toast.error(`You already have a ${selectedShift?.shift_type} shift booked for this date`);
+      toast.error(`You already have a shift booked for this date`);
       return;
     }
 
@@ -181,10 +178,8 @@ const Shifts = () => {
           <div className="lg:col-span-3">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {shifts.map((shift) => {
-                const isShiftTypeBooked = bookings.some(
-                  booking => 
-                    booking.shifts?.shift_type === shift.shift_type && 
-                    booking.shift_date === selectedDate.toISOString().split('T')[0]
+                const hasShiftBookedForDate = bookings.some(
+                  booking => booking.shift_date === selectedDate.toISOString().split('T')[0]
                 );
 
                 return (
@@ -212,11 +207,11 @@ const Shifts = () => {
 
                       <Button 
                         onClick={() => bookShift(shift.id)}
-                        disabled={isShiftTypeBooked}
+                        disabled={hasShiftBookedForDate}
                         className="w-full"
-                        variant={isShiftTypeBooked ? "secondary" : "default"}
+                        variant={hasShiftBookedForDate ? "secondary" : "default"}
                       >
-                        {isShiftTypeBooked ? `${shift.shift_type} shift booked` : "Book Shift"}
+                        {hasShiftBookedForDate ? "Already have shift for this day" : "Book Shift"}
                       </Button>
                     </CardContent>
                   </Card>
