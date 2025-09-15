@@ -164,7 +164,7 @@ const Shifts = () => {
                   selected={selectedDate}
                   onSelect={(date) => date && setSelectedDate(date)}
                   disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                  className="rounded-md border"
+                  className="rounded-md border pointer-events-auto"
                 />
                 <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                   <p className="text-sm font-medium">Selected Date:</p>
