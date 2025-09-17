@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Calendar, Clock, Users, ArrowRight } from 'lucide-react';
@@ -8,9 +8,23 @@ import { Calendar, Clock, Users, ArrowRight } from 'lucide-react';
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    // Check if this is an OAuth callback (has hash fragment with access_token)
+    const hasOAuthCallback = location.hash.includes('access_token=') || location.hash.includes('error=');
+    
+    if (hasOAuthCallback) {
+      console.log('OAuth callback detected, cleaning URL...');
+      // Clean up the URL by removing the hash fragment
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [location.hash]);
+
+  useEffect(() => {
+    // Redirect authenticated users to dashboard
     if (user && !loading) {
+      console.log('User authenticated, redirecting to dashboard...');
       navigate('/dashboard');
     }
   }, [user, loading, navigate]);
