@@ -75,10 +75,51 @@ const Shifts = () => {
     }
   };
 
+  const canBookShift = (shift: Shift, selectedDate: Date) => {
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const selectedDateOnly = new Date(selectedDate);
+    selectedDateOnly.setHours(0, 0, 0, 0);
+    
+    // If booking for a future date, always allow
+    if (selectedDateOnly > today) {
+      return { canBook: true, reason: '' };
+    }
+    
+    // If booking for today, check if shift time has passed
+    if (selectedDateOnly.getTime() === today.getTime()) {
+      const shiftStartTime = new Date();
+      const [hours, minutes] = shift.start_time.split(':').map(Number);
+      shiftStartTime.setHours(hours, minutes, 0, 0);
+      
+      if (now >= shiftStartTime) {
+        return { 
+          canBook: false, 
+          reason: `Cannot book ${shift.shift_type} shift - time has already passed`
+        };
+      }
+    }
+    
+    return { canBook: true, reason: '' };
+  };
+
   const bookShift = async (shiftId: string) => {
     if (!user) return;
 
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    
+    // Find the shift to check time validation
+    const shift = shifts.find(s => s.id === shiftId);
+    if (!shift) return;
+    
+    // Check if shift can be booked based on time
+    const { canBook, reason } = canBookShift(shift, selectedDate);
+    if (!canBook) {
+      toast.error(reason);
+      return;
+    }
     
     // Check if user already has ANY shift booked for the selected date
     const existingBooking = bookings.find(
@@ -101,6 +142,15 @@ const Shifts = () => {
         });
 
       if (error) throw error;
+
+      // Create activity record
+      await supabase.from('activities').insert({
+        user_id: user.id,
+        action_type: 'shift_booked',
+        description: `You booked a ${shift.shift_type} shift`,
+        shift_name: shift.name,
+        shift_date: selectedDateStr,
+      });
 
       toast.success('Shift booked successfully!');
       fetchBookings(); // Refresh bookings
@@ -235,6 +285,8 @@ const Shifts = () => {
                 );
 
                 const canUnbook = canUnbookShift(shift);
+                const { canBook, reason } = canBookShift(shift, selectedDate);
+                const disableBooking = hasAnyShiftBookedForDate || !canBook;
 
                 return (
                   <Card key={shift.id} className="hover:shadow-md transition-shadow">
@@ -276,11 +328,13 @@ const Shifts = () => {
                       ) : (
                         <Button 
                           onClick={() => bookShift(shift.id)}
-                          disabled={hasAnyShiftBookedForDate}
+                          disabled={disableBooking}
                           className="w-full"
-                          variant={hasAnyShiftBookedForDate ? "secondary" : "default"}
+                          variant={disableBooking ? "secondary" : "default"}
                         >
-                          {hasAnyShiftBookedForDate ? "Already have shift for this day" : "Book Shift"}
+                          {!canBook ? reason : 
+                           hasAnyShiftBookedForDate ? "Already have shift for this day" : 
+                           "Book Shift"}
                         </Button>
                       )}
                     </CardContent>
