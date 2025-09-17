@@ -3,10 +3,46 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, LogOut, Settings, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
   const { user, profile, signOut, isAdmin, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchRecentActivities();
+    }
+  }, [user]);
+
+  const fetchRecentActivities = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      setActivities(data || []);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch recent activities",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -146,11 +182,40 @@ const Dashboard = () => {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <div className="text-muted-foreground">
-                No recent activity to display
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="text-muted-foreground">Loading activities...</div>
               </div>
-            </div>
+            ) : activities.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-muted-foreground">
+                  No recent activity to display
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {activities.map((activity) => (
+                  <div key={activity.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-primary/10 p-2 rounded-full">
+                        <Calendar className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{activity.description}</p>
+                        {activity.shift_date && (
+                          <p className="text-xs text-muted-foreground">
+                            Date: {new Date(activity.shift_date).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(activity.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>

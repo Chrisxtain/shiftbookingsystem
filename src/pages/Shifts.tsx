@@ -116,6 +116,9 @@ const Shifts = () => {
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
 
     try {
+      // Find the shift details for activity logging
+      const shift = shifts.find(s => s.id === shiftId);
+      
       const { error } = await supabase
         .from('shift_bookings')
         .delete()
@@ -124,6 +127,17 @@ const Shifts = () => {
         .eq('shift_date', selectedDateStr);
 
       if (error) throw error;
+
+      if (shift) {
+        // Create activity record
+        await supabase.from('activities').insert({
+          user_id: user.id,
+          action_type: 'shift_unbooked',
+          description: `You unbooked a ${shift.shift_type} shift`,
+          shift_name: shift.name,
+          shift_date: selectedDateStr,
+        });
+      }
 
       toast.success('Shift unbooked successfully!');
       fetchBookings(); // Refresh bookings
