@@ -245,20 +245,20 @@ const Shifts = () => {
           <p className="text-muted-foreground">Select a date and book your shifts</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Calendar */}
-          <div className="lg:col-span-1">
+          <div className="lg:w-80 lg:flex-shrink-0">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Select Date</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => date && setSelectedDate(date)}
                   disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                  className="rounded-md border pointer-events-auto"
+                  className="rounded-md border pointer-events-auto w-full"
                 />
                 <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                   <p className="text-sm font-medium">Selected Date:</p>
@@ -271,8 +271,8 @@ const Shifts = () => {
           </div>
 
           {/* Shifts */}
-          <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
               {shifts.map((shift) => {
                 const hasAnyShiftBookedForDate = bookings.some(
                   booking => booking.shift_date === selectedDate.toISOString().split('T')[0]

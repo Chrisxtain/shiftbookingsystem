@@ -10,7 +10,6 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   isSuperAdmin: boolean;
@@ -154,32 +153,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const signInWithGoogle = async () => {
-    // Get the current port from window.location
-    const currentPort = window.location.port;
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    
-    // Construct proper redirect URL with correct port
-    const redirectUrl = `${protocol}//${hostname}${currentPort ? `:${currentPort}` : ''}/dashboard`;
-    
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    
-    if (error) {
-      toast({
-        title: "Google Sign In Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-    
-    return { error };
-  };
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -202,7 +175,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     signIn,
     signUp,
-    signInWithGoogle,
     signOut,
     isAdmin,
     isSuperAdmin,
