@@ -11,23 +11,26 @@ const Index = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if this is an OAuth callback (has hash fragment with access_token)
-    const hasOAuthCallback = location.hash.includes('access_token=') || location.hash.includes('error=');
-    
-    if (hasOAuthCallback) {
+    // Clean up the URL after OAuth callback and redirect to dashboard
+    if (location.hash.includes('access_token') || location.hash.includes('error')) {
       console.log('OAuth callback detected, cleaning URL...');
-      // Clean up the URL by removing the hash fragment
       window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // If user is authenticated after OAuth, redirect to dashboard
+      if (user && !loading) {
+        console.log('User authenticated after OAuth, redirecting to dashboard...');
+        navigate('/dashboard');
+      }
     }
-  }, [location.hash]);
+  }, [location.hash, user, loading, navigate]);
 
   useEffect(() => {
-    // Redirect authenticated users to dashboard
-    if (user && !loading) {
+    // Redirect authenticated users to dashboard (for direct visits)
+    if (user && !loading && !location.hash.includes('access_token')) {
       console.log('User authenticated, redirecting to dashboard...');
       navigate('/dashboard');
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location.hash]);
 
   if (loading) {
     return (

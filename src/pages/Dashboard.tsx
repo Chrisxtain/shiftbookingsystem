@@ -73,7 +73,7 @@ const Dashboard = () => {
               <div>
                 <h1 className="text-xl font-semibold">Shift Booking System</h1>
                 <p className="text-sm text-muted-foreground">
-                  Welcome back, {profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+                  Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}!
                 </p>
               </div>
             </div>

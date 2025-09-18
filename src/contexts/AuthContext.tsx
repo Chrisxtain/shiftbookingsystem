@@ -122,7 +122,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Get the current port from window.location
+    const currentPort = window.location.port;
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    
+    // Construct proper redirect URL with correct port
+    const redirectUrl = `${protocol}//${hostname}${currentPort ? `:${currentPort}` : ''}/dashboard`;
     
     const { error } = await supabase.auth.signUp({
       email,
@@ -149,7 +155,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Get the current port from window.location
+    const currentPort = window.location.port;
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    
+    // Construct proper redirect URL with correct port
+    const redirectUrl = `${protocol}//${hostname}${currentPort ? `:${currentPort}` : ''}/dashboard`;
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
